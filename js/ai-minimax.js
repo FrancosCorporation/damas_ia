@@ -61,13 +61,15 @@ export function jogadaMinimax(estado, profundidade = 4) {
 }
 
 // ITERATIVE DEEPENING + variedade (≤ 20cp do melhor sorteia — evita shuffle)
-export function escolheJogada(estado, tempoMs = 1000) {
+export function escolheJogada(estado, tempoMs = 1000, opts = {}) {
+  const profMax = opts.profMax ?? 64;
+  const ruido = opts.ruido ?? 0;
   const movs = movimentosLegais(estado);
   if (!movs.length) return null;
   const t0 = Date.now();
   let melhor = movs[0];
   let scores = new Map();
-  for (let prof = 1; ; prof++) {
+  for (let prof = 1; prof <= profMax; prof++) {
     const scoresProf = new Map();
     let melhorV = -Infinity, melhorDaProf = null;
     let alpha = -Infinity;
@@ -86,6 +88,14 @@ export function escolheJogada(estado, tempoMs = 1000) {
     if (!completo || Date.now() - t0 > tempoMs) break;
   }
   const melhorScore = scores.get(melhor.from + '-' + melhor.to + ':' + melhor.capturas.length) || 0;
+  if (ruido > 0) {
+    let melhorComRuido = null, melhorV = -Infinity;
+    for (const cand of movs) {
+      const v = (scores.get(cand.from + '-' + cand.to + ':' + cand.capturas.length) ?? -Infinity) + (Math.random() * 2 - 1) * ruido;
+      if (v > melhorV) { melhorV = v; melhorComRuido = cand; }
+    }
+    return melhorComRuido ?? melhor;
+  }
   const candidatos = movs.filter(m => {
     const v = scores.get(m.from + '-' + m.to + ':' + m.capturas.length);
     return v !== undefined && v >= melhorScore - 20;

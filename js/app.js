@@ -9,7 +9,7 @@ const GLIFOS = { wP: '⚪', wD: '♔', bP: '⚫', bD: '♚' };
 let estado = estadoInicial();
 let legais = movimentosLegais(estado);
 let selecionada = -1;
-let modo = 'pc';
+let modo = 'medio';
 let placar = { w: 0, b: 0 };
 let animando = false;
 let historico = {}; // posição → contagem (repetição = empate)

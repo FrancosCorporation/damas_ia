@@ -6,7 +6,7 @@ Eu queria jogar damas no navegador com as regras de verdade do Brasil — captur
 
 - **Regras brasileiras implementadas à mão**: captura obrigatória **e máxima** (com captura dupla/tripla disponível, só a maior vale), **cadeia de capturas** com a mesma peça (a peça capturada não bloqueia e não é recapturada), **dama voadora** (anda qualquer distância na diagonal e captura pulando UMA peça com casas vazias antes/depois), promoção só quando o peão TERMINA o lance na última fileira
 - **IA de posição** (negamax com poda): material (peão 100, dama 300) + avanço dos peões, **iterative deepening com orçamento de tempo** (PC = 800ms, Impossível = 2500ms) e **variedade na escolha** (entre lances quase equivalentes sorteia — nunca shuffla)
-- **3 modos**: Jogador × Jogador, Jogador × PC, Impossível
+- **4 modos**: Jogador × Jogador · **IA Fácil** (busca rasa + ruído na avaliação — erra lances) · **IA Média** · **IA Difícil** (3 segundos de iterative deepening — profundidade máxima)
 - **Placar de sessão**, destaque da peça selecionada, das casas de destino e das peças capturáveis (✕ vermelho)
 
 ## Como rodar

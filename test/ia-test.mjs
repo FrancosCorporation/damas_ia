@@ -136,3 +136,14 @@ test('escolheJogada com variedade: não repete o mesmo lance de ida e volta 10x'
 });
 
 function R_estadoJogo(s) { return estadoJogo(s); }
+
+
+test('modos de dificuldade: fácil (raso + ruído) e difícil (3s) devolvem lance legal', () => {
+  const s = estadoInicial();
+  const facil = escolheJogada(s, 150, { profMax: 1, ruido: 90 });
+  assert.ok(facil && typeof facil.from === 'number', 'fácil devolve lance');
+  assert.ok(movimentosLegais(s).some(m => m.from === facil.from && m.to === facil.to), 'fácil: lance legal');
+  const dificil = escolheJogada(s, 300, { profMax: 64 });
+  assert.ok(dificil && typeof dificil.from === 'number', 'difícil devolve lance');
+  assert.ok(movimentosLegais(s).some(m => m.from === dificil.from && m.to === dificil.to), 'difícil: lance legal');
+});
