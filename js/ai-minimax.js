@@ -60,6 +60,26 @@ export function jogadaMinimax(estado, profundidade = 4) {
   return melhor;
 }
 
+// menu de candidatos avaliados (modo LLM): cada lance legal com o score do minimax raso,
+// ordenado do melhor pro pior e limitado (dama voadora gera dezenas de lances — prompt precisa ser curto)
+export function candidatosAvaliados(estado, opts = {}) {
+  const prof = opts.profundidade ?? 2;
+  const max = opts.max ?? 18;
+  const movs = movimentosLegais(estado);
+  if (!movs.length) return [];
+  return movs
+    .map(m => ({ m, v: -busca(aplicar(estado, m), Math.max(0, prof - 1), -Infinity, Infinity) }))
+    .sort((a, b) => b.v - a.v)
+    .slice(0, max)
+    .map(c => ({
+      from: c.m.from,
+      to: c.m.to,
+      capturas: c.m.capturas,
+      caminho: c.m.caminho || [c.m.from, c.m.to],
+      score: c.v,
+    }));
+}
+
 // ITERATIVE DEEPENING + variedade (≤ 20cp do melhor sorteia — evita shuffle)
 export function escolheJogada(estado, tempoMs = 1000, opts = {}) {
   const profMax = opts.profMax ?? 64;
