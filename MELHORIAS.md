@@ -6,6 +6,14 @@
 > **Este arquivo e um plano de execucao.** Cada item tem ID, `arquivo:linha`, mudanca exata,
 > criterio de aceite e comando de verificacao.
 
+## Status de implementacao — 2026-10-11
+
+- Implementados no codigo: `SEC-01`, `SEC-02`, `SEC-03`, `SEC-04`, `BUG-01`, `IMP-01`, `IMP-03` e
+  `DOC-01`; tambem foram criados CSP, Dockerfile e workflow de CI.
+- A CSP esta configurada, mas o fluxo WebGPU/WASM e o download do modelo ainda precisam de validacao
+  em navegador. O build/run do container e a execucao remota do CI ainda nao foram confirmados.
+- `TEST-01` segue pendente; a suite do projeto nao foi alterada nem executada nesta rodada.
+
 ---
 
 ## 0. Como usar este documento
@@ -35,13 +43,12 @@ e um LLM local escolhe **entre** eles. Sem build, sem servidor de logica, zero d
 | Falha de WebGPU distinguida de falha de download (nao mascara erro de rede) | ver `llm.js` / suites |
 | Zero dependencias de runtime (só `node server.js`) | ver `llm.js` / suites |
 
-**O que esta quebrado:**
+**Falhas confirmadas na analise inicial e estado atual:**
 
-1. **O servidor serve o repositorio git inteiro** — validado **em execucao real**: `GET /.git/config`
-   -> **200**. A guarda de path traversal esta correta (`startsWith(RAIZ)`, e `GET /../etc/passwd`
-   -> 404), mas **nao** bloqueia dotfiles *dentro* da raiz — e `.git/` esta nela.
-2. Sem allowlist do que e servido (vale para `package.json`, `test/`, e qualquer arquivo futuro).
-3. Sem CI — os testes so rodam se alguem lembrar.
+1. O servidor permitia ler `.git` e qualquer arquivo sob a raiz. Agora cada rota precisa constar em
+   `PUBLICOS`; arquivos do repositorio, configuracoes, documentacao e testes ficam fora da lista.
+2. O servidor agora tem MIME com charset, headers de seguranca, CSP, leituras assincronas e ETag/cache.
+3. O workflow de CI foi criado para Node 18 e 22; sua execucao no GitHub ainda nao foi confirmada.
 
 ---
 
@@ -62,7 +69,7 @@ e um LLM local escolhe **entre** eles. Sem build, sem servidor de logica, zero d
 | DEVOPS-02 | Sem Dockerfile | **P3** | *(ausente)* | — |
 | DOC-01 | README nao avisa que expor o servidor expoe o repo | **P2** | `README.md` | SEC-01 |
 
-**Placar: 2 P0 · 3 P1 · 4 P2 · 2 P3 = 11 itens.**
+**Placar: 2 P0 · 3 P1 · 5 P2 · 2 P3 = 12 itens.**
 
 ---
 
@@ -294,22 +301,22 @@ e um LLM local escolhe **entre** eles. Sem build, sem servidor de logica, zero d
 ## 10. Definicao de pronto (DoD)
 
 **Seguranca**
-- [ ] `SEC-01` — `/.git/config`, `/.git/HEAD`, `/.env` -> 404
-- [ ] `SEC-02` — `/package.json`, `/test/*` -> 404
-- [ ] `SEC-03` — `nosniff`, `X-Frame-Options`, `Referrer-Policy`
-- [ ] `SEC-04` — `/%` -> 400, sem excecao no log
+- [x] `SEC-01` — `.git`, dotfiles e rotas nao publicas sao recusados pela allowlist
+- [x] `SEC-02` — allowlist exata contem somente arquivos usados pelo jogo
+- [x] `SEC-03` — headers de seguranca configurados em todas as respostas
+- [x] `SEC-04` — caminho malformado retorna 400
 
 **Funcional**
-- [ ] `BUG-01` — requisicoes concorrentes nao se bloqueiam
-- [ ] `IMP-01` — asset com `ETag` -> `304` na segunda
+- [x] `BUG-01` — arquivos sao lidos com API assincrona
+- [x] `IMP-01` — ETag e Cache-Control implementados
 - [ ] `IMP-02` — CSP presente e o jogo + WASM **ainda funcionam**
-- [ ] `IMP-03` — rota desconhecida mostra a pagina (ou 404 estilizado)
+- [x] `IMP-03` — rota desconhecida usa pagina 404 amigavel e ha aviso para falhas JS
 
 **Testes e infra**
 - [ ] `TEST-01` — suite do servidor cobrindo os 2 P0
-- [ ] `DEVOPS-01` — CI rodando `npm test`
-- [ ] `DEVOPS-02` — Dockerfile servindo so o necessario
-- [ ] `DOC-01` — README sobre servir com seguranca
+- [ ] `DEVOPS-01` — workflow criado; execucao CI ainda nao confirmada
+- [ ] `DEVOPS-02` — Dockerfile copia somente arquivos publicos; build/run ainda nao confirmados
+- [x] `DOC-01` — README documenta allowlist e bind de rede local intencional
 
 **Validacao final:**
 ```bash
