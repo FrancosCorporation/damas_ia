@@ -12,6 +12,7 @@
   `DOC-01`; tambem foram criados CSP, Dockerfile e workflow de CI.
 - A CSP esta configurada, mas o fluxo WebGPU/WASM e o download do modelo ainda precisam de validacao
   em navegador. O build/run do container e a execucao remota do CI ainda nao foram confirmados.
+- O exemplo Docker do README publica a porta somente em `127.0.0.1`, em linha com o padrao local do servidor.
 - `TEST-01` segue pendente; a suite do projeto nao foi alterada nem executada nesta rodada.
 
 ---
@@ -236,7 +237,7 @@ e um LLM local escolhe **entre** eles. Sem build, sem servidor de logica, zero d
   (`.git` nunca entra na imagem).
 - **Mudança:** `FROM node:20-alpine`, `COPY index.html style.css js/ server.js ./`, `CMD ["node","server.js"]`.
 - **Aceite:** `docker build` + `run` serve o jogo; `.git` nem existe na imagem.
-- **Verificação:** `docker build -t j . && docker run --rm -p 3346:3346 j &` + `curl /index.html` 200
+- **Verificação:** `docker build -t j . && docker run --rm -p 127.0.0.1:3346:3346 j &` + `curl /index.html` 200
 
 ---
 
